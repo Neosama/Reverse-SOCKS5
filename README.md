@@ -1,6 +1,6 @@
 # Reverse-SOCKS5
 
-Server/Client Secured Over Credential-based Kerberos 5 (SOCKS5) in Reverse mode on Windows.
+Server/Client SOCKS5 (Secured Over Credential-based Kerberos 5) in Reverse mode on Windows.
 Client need Proxifier for to work.
 Defined in RFC 1928.
 
