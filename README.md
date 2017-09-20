@@ -1,8 +1,8 @@
 # Reverse-SOCKS5
 
 Server/Client Secured Over Credential-based Kerberos 5 (SOCKS5) in Reverse mode on Windows.
-Defined in RFC 1928.
-Client need Proxifier for to work.
+<\n>Defined in RFC 1928.
+<\n>Client need Proxifier for to work.
 
 Contains:
 - TCP connection
