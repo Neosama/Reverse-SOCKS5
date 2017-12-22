@@ -13,7 +13,7 @@ int main()
 	FreeConsole();
 	std::cout << "SK5\n" << std::endl;
 
-    // Hey! Windows je fais du reseau !
+    	// Hey! Windows je fais du reseau !
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2,0), &WSAData);
 
@@ -35,7 +35,7 @@ int main()
 	*/
 
 	char *ip_SK5 = "XX.XX.XX.XX";
-    int port_SK5 = 40001; // 40001
+    	int port_SK5 = 40001; // 40001
 	
 	while(1)
 	{
