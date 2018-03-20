@@ -6,9 +6,6 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
-// LIB Compress
-#include "lz4.h"
-
 #include "lib_SK5.h"
 
 #pragma comment(lib, "ws2_32.lib")
@@ -44,7 +41,7 @@ int main()
 		{
 			if(one_time)
 			{
-				printf("Connection OK avec SK5 - BASE \n");
+				printf("Connection OK with SK5 - BASE \n");
 				one_time = TRUE;
 			}
 
