@@ -7,9 +7,6 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
-// Lib for Compress
-#include "lz4.h"
-
 #include "lib_SK5_BASE.h"
 
 #pragma comment(lib, "ws2_32.lib")
