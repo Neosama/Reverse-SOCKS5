@@ -8,6 +8,7 @@ Contains:
 - TCP connection
 - Multi-Threads
 - Kill-switch for server with a special request URL
+- Functions deprecated replaced (inet_addr, gethostbyname, etc ...)
 
 Todo:
 - Implementing UDP Compatibility
