@@ -14,7 +14,7 @@
 int main()
 {
 	std::cout << "SK5 SERVER V2\n" << std::endl;
-	std::cout << "With LZ4 & IPv6 compatibility\n" << std::endl;
+	std::cout << "XXXXX\n" << std::endl;
 
 	/*
 	const char* text = "GET / TCP www.google.com www.facebook.com www.secret.gov";
