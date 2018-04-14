@@ -1,4 +1,4 @@
-# Reverse-SOCKS5
+# Reverse-SOCKS5 V2
 
 Server/Client SOCKS5 (Secured Over Credential-based Kerberos 5) in Reverse mode on Windows.
 Client need Proxifier for to work.
@@ -7,8 +7,17 @@ Defined in RFC 1928.
 Contains:
 - TCP connection
 - Multi-Threads
-- Kill-switch for server with a special request URL
-- Functions deprecated replaced (inet_addr, gethostbyname, etc ...)
+- Specials URL for execute actions in SK5_Client
+- OldModem mode is a limited connection to ~2KB/sec for nostalgic surf
+
+Specials URL list:
+- "exitsoft.sk5", for kill SK5 Client
+- "tetris.sk5", for play Tetris theme
+
+Version 1 VS Version 2:
+- Better management of Threads
+- Code Optimization, Comments in English only and Cleanup
+- Add OldModem and Tetris theme for fun
 
 Todo:
 - Implementing UDP Compatibility
