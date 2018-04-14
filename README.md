@@ -14,14 +14,13 @@ Specials URL list:
 - "exitsoft.sk5", for kill SK5 Client
 - "tetris.sk5", for play Tetris theme
 
-Version 1 VS Version 2:
+Changelog:
 - Better management of Threads
 - Code Optimization, Comments in English only and Cleanup
 - Add OldModem and Tetris theme for fun
 
 Todo:
-- Implementing UDP Compatibility
-- Better thread management
-- Code Optimization and Cleanup
+- IPv6 support
+- Replace deprecated functions
 
 This project is licensed under the GNU General Public License v3.0
