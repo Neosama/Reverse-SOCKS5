@@ -22,5 +22,6 @@ Changelog:
 Todo:
 - IPv6 support
 - Replace deprecated functions
+- Add statistic page in Specials URL
 
 This project is licensed under the GNU General Public License v3.0
