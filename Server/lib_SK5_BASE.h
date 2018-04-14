@@ -1,18 +1,9 @@
 
-// LIB SK5_BASE_2
+/*
 
-std::string hex_string(std::string hexstr)
-{
-	std::string str = "";
-	str.resize((hexstr.size() + 1) / 2);
-	for (size_t i = 0, j = 0; i < str.size(); i++, j++)
-	{
-		char at = '@';
-		str[i] = (hexstr[j] & at ? hexstr[j] + 9 : hexstr[j]) << 4, j++;
-		str[i] |= (hexstr[j] & at ? hexstr[j] + 9 : hexstr[j]) & 0xF;
-	}
-	return str;
-}
+LIB SK5 - BASE
+
+*/
 
 std::string string_hex(std::string str, const bool capital = false)
 {
@@ -77,6 +68,10 @@ typedef struct
 {
 	SOCKET x;
 	SOCKET y;
+	BOOL VERBOSE_mode;
+	BOOL OLDMODEM_mode;
+	int timeout_sec;
+	int buf_size;
 } threaddata;
 
 unsigned long WINAPI Fonction1(void* params)
@@ -85,37 +80,57 @@ unsigned long WINAPI Fonction1(void* params)
 
 	SOCKET s_CLIENT = sub->x;
 	SOCKET s_SK5 = sub->y;
+	BOOL VERBOSE_mode = sub->VERBOSE_mode;
+	BOOL OLDMODEM_mode = sub->OLDMODEM_mode;
+	int timeout_sec = sub->timeout_sec;
+	int buf_size = sub->buf_size;
 
-	char buffer_connect[1024];
-	memset(buffer_connect, 0, sizeof(buffer_connect));
+	char buf[1024 * 10];
 
 	fd_set readfds;
 	int result, nfds = max(s_CLIENT, s_SK5) + 1;
 	set_fds(s_CLIENT, s_SK5, &readfds);
-	while ((result = select(nfds, &readfds, 0, 0, 0)) > 0)  // PROXIFIER <-> SK5-CLIENT
+
+	// Set timeout for select
+	timeval tv;
+	tv.tv_sec = timeout_sec;
+	tv.tv_usec = 0;
+
+	memset(buf, 0, sizeof(buf));
+
+	while ((result = select(nfds, &readfds, 0, 0, &tv)) > 0)  // s_Client <-> s_SK5
 	{
-		if (FD_ISSET(s_CLIENT, &readfds)) // PROXIFIER -> SK5-CLIENT
+		if (FD_ISSET(s_CLIENT, &readfds)) // s_Client -> s_SK5
 		{
-			int recvd = recv(s_CLIENT, buffer_connect, 256, 0); // Recv PROXFIER
-			if (recvd <= 0)
+			int recvd_A = recv(s_CLIENT, buf, buf_size, 0);
+			if (recvd_A <= 0)
 			{
+				printf("[ERROR] s_Client -> s_SK5 recvd (%i) <= 0\n", recvd_A);
 				closesocket(s_CLIENT);
 				return 3;
 			}
-			send(s_SK5, buffer_connect, recvd, 0); // Send SK5-CLIENT
+
+			int sendd_A = send(s_SK5, buf, recvd_A, 0);
 		}
 
-		if (FD_ISSET(s_SK5, &readfds))  // SK5-CLIENT -> PROXIFIER
+		if (FD_ISSET(s_SK5, &readfds))  // s_SK5-> s_Client
 		{
-			int recvd = recv(s_SK5, buffer_connect, 256, 0);
-			if (recvd <= 0)
+			int recvd_B = 0;
+
+			recvd_B = recv(s_SK5, buf, buf_size, 0);
+
+			if (recvd_B <= 0)
 			{
+				printf("[ERROR] s_SK5-> s_Client recvd (%i) <= 0\n", recvd_B);
 				closesocket(s_CLIENT);
 				return 4;
 			}
-			send(s_CLIENT, buffer_connect, recvd, 0);
+			int sendd_B = send(s_CLIENT, buf, recvd_B, 0);
 		}
 		set_fds(s_CLIENT, s_SK5, &readfds);
+
+		if (OLDMODEM_mode)
+			Sleep(250);
 	}
 
 	shutdown(s_CLIENT, 2);
@@ -129,9 +144,7 @@ static int create_sock_thread(threaddata f)
 	HANDLE handle;
 	if (!(handle = CreateThread(NULL, 0, Fonction1, (void *)&f, 0, 0)))
 		return 0;
-
 	CloseHandle(handle);
+
 	return 1;
 }
-
-
