@@ -1,16 +1,5 @@
 # Reverse-SOCKS5 V2
 
-  -ymNMMMMdy/     'mm/       /hmmo'  .=Neosama=:                         :ydmmmmy+'   
- yMNs:-.-:oNMd.   .MM+    '/mMNs.    yMMsoooooo.                       'hMNy/:/omMN:  
-.MMs       .mms   .MM+  '+mMNs.     'NMd                 .::.      -::':mm/     'NMh  
-'hMNs/-.''        .MM+'+mMm+.       +MMhshhhy+.          .NMd'    .NMd          /MMs  
- '/ymNNNmdys/.    .MMdmMNMm:        dNNds++sdMNo          /MMo   'dMN.        .sMNy'  
-     .-:+shmMN+   .MMMd/.yNMy.      ---'     oMM/          yMM-  oMM+      ':yNNh:    
-hhs        'yMM.  .MMs'   :dMm/     ..'      -MMo          'dMd'-NMd'    '+dMms-      
-yMM+'      .hMN.  .MM+     'oNMh.  .mNh'    'yMN:           -NMsdMN-    /mMd/.        
-'omMmhs++shmMd:   .MM+       -hMN+' /mMdsoosdMd:             +MMMM+    /MMMhhhhhhhhh  
-  ':osyyyys+-'    'ss-        '+so:  ':Server:'               +sso     /ssssssssssss  
-
 Server/Client SOCKS5 (Secured Over Credential-based Kerberos 5) in Reverse mode on Windows.  
 Client need Proxifier for to work.  
 Defined in RFC 1928.  
