@@ -1,11 +1,8 @@
 
 #include <iostream>
+#include <winsock2.h>
 #include <string>
 #include <sstream>
-#include <stdlib.h>
-
-#include <winsock2.h>
-#include <ws2tcpip.h>
 
 #include "lib_SK5_BASE.h"
 
@@ -13,85 +10,100 @@
 
 int main()
 {
-	std::cout << "SK5 SERVER V2\n" << std::endl;
-	std::cout << "XXXXX\n" << std::endl;
+	// Variables Parameters
+	int port_listen_SK5 = 40001;   // SK5 CLIENT
+	int port_listen_CLIENT = 9082; // PROXIFIER
+	int buf_size = 512; // MAX 1024 * 10
+	BOOL VERBOSE_mode = TRUE; // If FALSE only [ERROR] is show
+	BOOL OLDMODEM_mode = TRUE; // Get your 56k modem ! Limit to ~2KB/sec with buf_size = 512
+	int timeout_sec = 30;
 
-	/*
-	const char* text = "GET / TCP www.google.com www.facebook.com www.secret.gov";
-	std::cout << "Text size: " << strlen(text) << std::endl;
+	printf("  -ymNMMMMdy/     `mm/       /hmmo`  .=Neosama=:                         :ydmmmmy+` \n");
+	printf(" yMNs:-.-:oNMd.   .MM+    `/mMNs.    yMMsoooooo.                       `hMNy/:/omMN:\n");
+	printf(".MMs       .mms   .MM+  `+mMNs.     `NMd                 .::.      -::`:mm/     `NMh\n");
+	printf("`hMNs/-.``        .MM+`+mMm+.       +MMhshhhy+.          .NMd`    .NMd          /MMs\n");
+	printf(" `/ymNNNmdys/.    .MMdmMNMm:        dNNds++sdMNo          /MMo   `dMN.        .sMNy`\n");
+	printf("     .-:+shmMN+   .MMMd/.yNMy.      ---`     oMM/          yMM-  oMM+      `:yNNh:  \n");
+	printf("hhs        `yMM.  .MMs`   :dMm/     ..`      -MMo          `dMd`-NMd`    `+dMms-    \n");
+	printf("yMM+`      .hMN.  .MM+     `oNMh.  .mNh`    `yMN:           -NMsdMN-    /mMd/.      \n");
+	printf("`omMmhs++shmMd:   .MM+       -hMN+` /mMdsoosdMd:             +MMMM+    /MMMhhhhhhhhh\n");
+	printf("  `:osyyyys+-`    `ss-        `+so:  `:Server:`               +sso     /ssssssssssss\n");
+	
+	printf("\n================================================\n");
+	printf("         Configuration\n");
+	printf("Port listen for SK5 : %i\n", port_listen_SK5);
+	printf("Port listen for Proxifier : %i\n", port_listen_CLIENT);
+	printf("BUFFER SIZE : %i\n", buf_size);
+	printf("TIMEOUT (sec) : %i\n", timeout_sec);
+	printf("Verbose : %s\n", (VERBOSE_mode ? "ENABLE" : "DISABLE"));
+	printf("OLDMODEM_mode : %s\n\n", (OLDMODEM_mode ? "ENABLE" : "DISABLE"));
+	printf("         Specials URL\n");
+	printf("exitsoft.sk5 : Close program SK5_Client\n");
+	printf("tetris.sk5 : Play Tetris music on SK5_Client\n");
+	printf("================================================\n\n");
 
-	int size_x = LZ4_compressBound(strlen(text));
-	char *compressedData = new char[size_x];
-	int compressedSize = LZ4_compress_default(text, compressedData, strlen(text), size_x);
-
-	std::cout << "Compressed size: " << compressedSize << std::endl;
-	std::cout << "Compressed DATA : " << compressedData << std::endl;
-
-	if (compressedSize > strlen(text)) {
-		int uu = compressedSize - strlen(text);
-		std::cout << "DIFF SIZE : +" << uu << std::endl;
-	}
-	else {
-		int cc = strlen(text) - compressedSize;
-		std::cout << "DIFF SIZE : -" << cc << std::endl;
-	}
-
-	char tmp_buff[1024 * 4];
-	memset(tmp_buff, 0, sizeof(tmp_buff));
-	LZ4_decompress_safe(text, tmp_buff, strlen(text), sizeof(tmp_buff));
-
-	printf("\nDECOMPRESSED (SIZE = %i) = \"%s\"\n", strlen(text), text);
-	system("PAUSE");
-	*/
-
-	// Configuration
-	int port_listen_SK5 = 40001;   // SK5 LAN/WAN
-	int port_listen_CLIENT = 9082; // Proxifier
-
-	// Check Configuration
-	printf("Configuration :\n");
-	printf("Port SK5 : %i\n", port_listen_SK5);
-	printf("Port CLIENT : %i\n", port_listen_CLIENT);
-
-	// Hey! Windows je fais du reseau !
+	// Initiates Winsock
 	WSADATA WSAData;
-	WSAStartup(MAKEWORD(2, 0), &WSAData);
+	int ret = WSAStartup(MAKEWORD(2, 0), &WSAData);
+	if (ret != 0)
+	{
+		printf("[ERROR] WSAStartup error: %i\n", ret);
+		return -1;
+	}
+	else
+		if (VERBOSE_mode) printf("[+] WSAStartup success\n");
 
-	// SOCKET PROXIFIER
 	SOCKET      s_CLIENT;
 	SOCKET      serverSocket_CLIENT;
 	SOCKADDR_IN addr_CLIENT;
 	INT         addrSize_CLIENT;
 	if (!StartServer(port_listen_CLIENT, &serverSocket_CLIENT, &addr_CLIENT, &addrSize_CLIENT))
+	{
+		printf("[ERROR] StartServer s_CLIENT\n");
 		return 1;
+	}
+	else
+		if (VERBOSE_mode) printf("[+] StartServer s_CLIENT success\n");
 
 	SOCKET      s_SK5;
 	SOCKET      serverSocket_SK5;
 	SOCKADDR_IN addr_SK5;
 	INT         addrSize_SK5;
 	if (!StartServer(port_listen_SK5, &serverSocket_SK5, &addr_SK5, &addrSize_SK5))
-		return 2;
-
-	threaddata d;
-
-	while (1)
 	{
-		int nb_connect = 0;
+		printf("[ERROR] StartServer s_SK5\n");
+		return 2;
+	}
+	else
+		if (VERBOSE_mode) printf("[+] StartServer s_SK5 success\n");
 
-		// Connections client/SK5
-		s_SK5 = accept(serverSocket_SK5, (SOCKADDR *)&addr_SK5, &addrSize_SK5);
-		s_CLIENT = accept(serverSocket_CLIENT, (SOCKADDR *)&addr_CLIENT, &addrSize_CLIENT);
-
-		if (s_CLIENT != INVALID_SOCKET && s_SK5 != INVALID_SOCKET)
+	while(1)
+	{
+		s_SK5 = accept(serverSocket_SK5, (SOCKADDR *) &addr_SK5, &addrSize_SK5);
+		if (s_SK5 == INVALID_SOCKET)
 		{
-			printf("\n\nClient/SK5 Connect\n");
-
-			d.x = s_CLIENT;
-			d.y = s_SK5;
-
-			create_sock_thread(d);
+			printf("[ERROR] s_SK5 INVALID_SOCKET!\n");
 		}
+		else
+			if(VERBOSE_mode) printf("[+] s_SK5 Connected\n");
 
+		s_CLIENT = accept(serverSocket_CLIENT, (SOCKADDR *) &addr_CLIENT, &addrSize_CLIENT);
+		if (s_CLIENT == INVALID_SOCKET)
+		{
+			printf("[ERROR] s_Client INVALID_SOCKET!\n");
+		}
+		else
+			if (VERBOSE_mode) printf("[+] s_Client Connected\n");
+
+		// Pass parameters to thread with threaddata
+		threaddata d;
+		d.x = s_CLIENT;
+		d.y = s_SK5;
+		d.VERBOSE_mode = VERBOSE_mode;
+		d.OLDMODEM_mode = OLDMODEM_mode;
+		d.buf_size = buf_size;
+
+		create_sock_thread(d);
 	}
 
 	system("\n\npause");
