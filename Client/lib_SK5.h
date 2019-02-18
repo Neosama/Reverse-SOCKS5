@@ -1,9 +1,5 @@
 
-/*
-
-LIB SK5
-
-*/
+// CLIENT_SK5_V2
 
 std::string hex_string(std::string hexstr)
 {
@@ -203,57 +199,49 @@ DWORD WINAPI sock5_gen(void *param)
 	int timeout_sec = sub->timeout_sec;
 	int buf_size = sub->buf_size;
 
-	// SIZE DATA RECV
-	int SIZE_DATA_RECV = 256 * 4;
-
-	char buf[1024*10];
+	char buf[512]; // If changed, line 25 in main.cpp is a change too
 	int version_sock = 0; // 5, 4, 0, ??
 
 	// Phase A = Version Socks, Send Msg Auth
 	memset(buf, 0, sizeof(buf));
 
 	// Get Version Socks
-	int size_recv_PA = 0;
-
-	size_recv_PA = recv(sock_SK5, buf, sizeof(buf), 0);
-
+	int size_recv_PA = recv(sock_SK5, buf, sizeof(buf), 0);
+	
 	if (size_recv_PA <= 0)
 	{
-		printf("[ERROR] size_recv_PA <= 0\n");
+		printf("[!] size_recv_PA <= 0\n");
 		closesocket(sock_SK5);
 		return 1;
 	}
 
 	version_sock = buf[0];
-
 	if (version_sock != 5)
 	{
-		printf("[ERROR] version_sock != 5\n");
+		printf("[!] version_sock != 5\n");
 		closesocket(sock_SK5);
 		return 1;
 	}
 
 	// Send msg_auth_ok
-	int size_send_PA = 0;
-
-	size_send_PA = send(sock_SK5, msg_auth_ok, sizeof(msg_auth_ok), 0);
-
+	
+	int size_send_PA = send(sock_SK5, msg_auth_ok, sizeof(msg_auth_ok), 0);
+	
 	if (size_send_PA <= 0)
 	{
-		printf("[ERROR] size_send_PA <= 0\n");
+		printf("[!] size_send_PA <= 0\n");
 		closesocket(sock_SK5);
 		return 1;
 	}
 
 	// Phase B = Mode Connect & Type Addr & Addr/Port
 	memset(buf, 0, sizeof(buf));
-	int size_recv_PB = 0;
 
-	size_recv_PB = recv(sock_SK5, buf, sizeof(buf), 0);
+	int size_recv_PB = recv(sock_SK5, buf, sizeof(buf), 0);
 
 	if (size_recv_PB <= 0)
 	{
-		printf("[ERROR] size_recv_PB <= 0\n");
+		printf("[!] size_recv_PB <= 0\n");
 		closesocket(sock_SK5);
 		return 1;
 	}
@@ -263,7 +251,7 @@ DWORD WINAPI sock5_gen(void *param)
 
 	if (mode_cmd != 1)
 	{
-		printf("[ERROR] Bind/UDP not supported\n");
+		printf("[!] Bind/UDP not supported\n");
 		closesocket(sock_SK5);
 		return 1;
 	}
@@ -291,17 +279,21 @@ DWORD WINAPI sock5_gen(void *param)
 		int size_domain_name = buf[4]; // Get size Domain Name
 		std::string str_domain_name;
 		std::string str_port_dest;
-		
+
 		try
 		{
 			str_domain_name = raw_demand.substr(5, size_domain_name); // get domain_name
 			str_port_dest = raw_demand.substr(5 + size_domain_name, 5 + size_domain_name + 2); // get Port
 			dest_port = hex_to_dec(string_hex(str_port_dest)); // port dest in long
 		}
-		catch (const std::out_of_range& e) 
+		catch (const std::out_of_range& e)
 		{
-			printf("[ERROR] Out of Range\n");
+			printf("[!] Out of Range\n");
 		}
+
+		//
+		// Specials URL
+		//
 
 		// Hostname EXIT
 		if (std::string(str_domain_name).find("exitsoft.sk5") != std::string::npos)
@@ -321,7 +313,7 @@ DWORD WINAPI sock5_gen(void *param)
 		he_a = gethostbyname(str_domain_name.c_str());
 		if (he_a == NULL) // Error gethostbyname
 		{
-			printf("[ERROR] gethostbyname\n");
+			printf("[!] gethostbyname\n");
 			closesocket(sock_SK5);
 			return 12;
 		}
@@ -333,11 +325,9 @@ DWORD WINAPI sock5_gen(void *param)
 
 	if (type_addr == 4) // IPv6
 	{
-		printf("[ERROR] IPv6 not supported\n");
+		printf("[!] IPv6 not supported\n");
 
-		int size_send_IPNOK = 0;
-
-		size_send_IPNOK = send(sock_SK5, msg_ipv6_nok, sizeof(msg_ipv6_nok), 0);
+		int size_send_IPNOK = send(sock_SK5, msg_ipv6_nok, sizeof(msg_ipv6_nok), 0);
 
 		if (size_send_IPNOK <= 0) // Send msg_ipv6_nok
 		{
@@ -349,26 +339,22 @@ DWORD WINAPI sock5_gen(void *param)
 	}
 
 	// Phase C = Send Request Addr OK & Recv Request & Connect to TARGET SERVER
-	int size_send_PC = 0;
-
-	size_send_PC = send(sock_SK5, msg_request_co_ok, sizeof(msg_request_co_ok), 0);
+	int size_send_PC = send(sock_SK5, msg_request_co_ok, sizeof(msg_request_co_ok), 0);
 
 	if (size_send_PC <= 0) // Send msg_request_co_ok
 	{
-		printf("[ERROR] size_send_PC <= 0\n");
+		printf("[!] size_send_PC <= 0\n");
 		closesocket(sock_SK5);
 		return 1;
 	}
 
 	memset(buf, 0, sizeof(buf));
 
-	int size_recv_PC = 0;
-
-	size_recv_PC = recv(sock_SK5, buf, sizeof(buf), 0);
+	int size_recv_PC = recv(sock_SK5, buf, sizeof(buf), 0);
 
 	if (size_recv_PC <= 0)
 	{
-		printf("[ERROR] size_recv_PC <= 0\n");
+		printf("[!] size_recv_PC <= 0\n");
 		closesocket(sock_SK5);
 		return 1;
 	}
@@ -377,7 +363,7 @@ DWORD WINAPI sock5_gen(void *param)
 	struct sockaddr_in serveraddra_a;
 
 	if ((client_TARGET = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) //open socket
-		printf("[ERROR] socket() failed\n");
+		printf("[!] socket() failed\n");
 
 	//connect
 	memset(&serveraddra_a, 0, sizeof(serveraddra_a));
@@ -387,13 +373,13 @@ DWORD WINAPI sock5_gen(void *param)
 
 	if (connect(client_TARGET, (struct sockaddr *) &serveraddra_a, sizeof(serveraddra_a)) == SOCKET_ERROR)
 	{
-		printf("[ERROR] connect() failed\n");
+		printf("[!] connect() failed\n");
 		closesocket(sock_SK5);
 		return 1;
 	}
 
 	if (send(client_TARGET, buf, size_recv_PC, 0) != size_recv_PC)
-		printf("[ERROR] send() sent a different number of bytes than expected\n");
+		printf("[!] send() sent a different number of bytes than expected\n");
 
 	fd_set readfds;
 	int result, nfds = max(sock_SK5, client_TARGET) + 1;
@@ -406,46 +392,57 @@ DWORD WINAPI sock5_gen(void *param)
 
 	memset(buf, 0, sizeof(buf));
 
-	while ((result = select(nfds, &readfds, 0, 0, &tv)) > 0)  // SK5_BASE <-> SERVER_TARGET
+	while (TRUE)  // SK5_BASE <-> SERVER_TARGET
 	{
-		if (FD_ISSET(sock_SK5, &readfds)) // SK5_BASE -> SERVER_TARGET
+		if ((result = select(nfds, &readfds, 0, 0, &tv)) > 0)
 		{
-			int recvd_A = 0;
-
-			recvd_A = recv(sock_SK5, buf, buf_size, 0);
-
-			if (recvd_A <= 0)
+			if (FD_ISSET(sock_SK5, &readfds)) // SK5_BASE -> SERVER_TARGET
 			{
-				printf("[ERROR] recvd_A (%i) <= 0\n", recvd_A);
-				closesocket(sock_SK5);
-				return 1;
+				int recvd_A = 0;
+
+				recvd_A = recv(sock_SK5, buf, buf_size, 0);
+
+				if (recvd_A <= 0)
+				{
+					printf("[!] recvd_A (%i) <= 0\n", recvd_A);
+					closesocket(sock_SK5);
+					return 1;
+				}
+
+				int sendd_A = 0;
+				send(client_TARGET, buf, recvd_A, 0); // SERVER_TARGET
+
+				if (VERBOSE_mode) printf("[+] A DATA RECV = %i | DATA SEND = %i\n", recvd_A, sendd_A);
 			}
 
-			int sendd_A = 0;
-			send(client_TARGET, buf, recvd_A, 0); // SERVER_TARGET
-
-			if (VERBOSE_mode)
-				printf("[+] A DATA RECV = %i | DATA SEND = %i\n", recvd_A, sendd_A);
-		}
-
-		if (FD_ISSET(client_TARGET, &readfds))  // SERVER_TARGET -> SK5_BASE
-		{
-			int recvd_B = recv(client_TARGET, buf, buf_size, 0);
-			if (recvd_B <= 0)
+			if (FD_ISSET(client_TARGET, &readfds))  // SERVER_TARGET -> SK5_BASE
 			{
-				printf("[ERROR] recvd_B (%i) <= 0\n", recvd_B);
-				closesocket(sock_SK5);
-				return 1;
+				int recvd_B = recv(client_TARGET, buf, buf_size, 0);
+				if (recvd_B <= 0)
+				{
+					printf("[!] recvd_B (%i) <= 0\n", recvd_B);
+					closesocket(sock_SK5);
+					return 1;
+				}
+
+				int sendd_B = 0;
+
+				sendd_B = send(sock_SK5, buf, recvd_B, 0);
+
+				if (VERBOSE_mode) printf("[+] B DATA RECV = %i | DATA SEND = %i\n", recvd_B, sendd_B);
 			}
-
-			int sendd_B = 0;
-
-			sendd_B = send(sock_SK5, buf, recvd_B, 0);
-
-			if (VERBOSE_mode)
-				printf("[+] B DATA RECV = %i | DATA SEND = %i\n", recvd_B, sendd_B);
+			set_fds(sock_SK5, client_TARGET, &readfds);
 		}
-		set_fds(sock_SK5, client_TARGET, &readfds);
+		else
+		{
+			printf("[!] select > 0\n");
+			shutdown(client_TARGET, 2);
+			closesocket(client_TARGET);
+			closesocket(sock_SK5);
+
+			return 12;
+		}
+
 	}
 
 	shutdown(client_TARGET, 2);
@@ -455,12 +452,13 @@ DWORD WINAPI sock5_gen(void *param)
 	return 0;
 }
 
-static int create_sock_thread(threaddata s)
+static int create_sock_thread(void* s)
 {
 	HANDLE handle;
-	if (!(handle = CreateThread(NULL, 0, sock5_gen, (void *)&s, 0, 0)))
-		return 0;
-	CloseHandle(handle);
 
+	if (!(handle = CreateThread(NULL, 0, sock5_gen, s, 0, 0)))
+		return 0;
+
+	CloseHandle(handle);
 	return 1;
 }
