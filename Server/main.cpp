@@ -1,6 +1,8 @@
 
-#include <iostream>
+// SERVER_SK5_V2
+
 #include <winsock2.h>
+#include <iostream>
 #include <string>
 #include <sstream>
 
@@ -10,14 +12,17 @@
 
 int main()
 {
-	// Variables Parameters
+	printf("SERVER_SK5_V2\n");
+
+	// Configuration variables
+	BOOL VERBOSE_mode = TRUE; // If FALSE only [!] is show
+	BOOL OLDMODEM_mode = FALSE; // Get your 56k modem ! Limit to ~2KB/sec with buf_size = 512
 	int port_listen_SK5 = 40001;   // SK5 CLIENT
 	int port_listen_CLIENT = 9082; // PROXIFIER
-	int buf_size = 512; // MAX 1024 * 10
-	BOOL VERBOSE_mode = TRUE; // If FALSE only [ERROR] is show
-	BOOL OLDMODEM_mode = TRUE; // Get your 56k modem ! Limit to ~2KB/sec with buf_size = 512
-	int timeout_sec = 30;
+	const int buf_size = 512; // If changed, line 84 in lib_SK5_BASE.h is a change too
+	int timeout_sec = 30; // seconds
 
+	// HERE PRINTF LAND
 	printf("  -ymNMMMMdy/     `mm/       /hmmo`  .=Neosama=:                         :ydmmmmy+` \n");
 	printf(" yMNs:-.-:oNMd.   .MM+    `/mMNs.    yMMsoooooo.                       `hMNy/:/omMN:\n");
 	printf(".MMs       .mms   .MM+  `+mMNs.     `NMd                 .::.      -::`:mm/     `NMh\n");
@@ -28,7 +33,7 @@ int main()
 	printf("yMM+`      .hMN.  .MM+     `oNMh.  .mNh`    `yMN:           -NMsdMN-    /mMd/.      \n");
 	printf("`omMmhs++shmMd:   .MM+       -hMN+` /mMdsoosdMd:             +MMMM+    /MMMhhhhhhhhh\n");
 	printf("  `:osyyyys+-`    `ss-        `+so:  `:Server:`               +sso     /ssssssssssss\n");
-	
+
 	printf("\n================================================\n");
 	printf("         Configuration\n");
 	printf("Port listen for SK5 : %i\n", port_listen_SK5);
@@ -47,7 +52,7 @@ int main()
 	int ret = WSAStartup(MAKEWORD(2, 0), &WSAData);
 	if (ret != 0)
 	{
-		printf("[ERROR] WSAStartup error: %i\n", ret);
+		printf("[!] WSAStartup error: %i\n", ret);
 		return -1;
 	}
 	else
@@ -59,7 +64,7 @@ int main()
 	INT         addrSize_CLIENT;
 	if (!StartServer(port_listen_CLIENT, &serverSocket_CLIENT, &addr_CLIENT, &addrSize_CLIENT))
 	{
-		printf("[ERROR] StartServer s_CLIENT\n");
+		printf("[!] StartServer s_CLIENT error\n");
 		return 1;
 	}
 	else
@@ -71,26 +76,26 @@ int main()
 	INT         addrSize_SK5;
 	if (!StartServer(port_listen_SK5, &serverSocket_SK5, &addr_SK5, &addrSize_SK5))
 	{
-		printf("[ERROR] StartServer s_SK5\n");
+		printf("[!] StartServer s_SK5 error\n");
 		return 2;
 	}
 	else
 		if (VERBOSE_mode) printf("[+] StartServer s_SK5 success\n");
 
-	while(1)
+	while (1)
 	{
-		s_SK5 = accept(serverSocket_SK5, (SOCKADDR *) &addr_SK5, &addrSize_SK5);
+		s_SK5 = accept(serverSocket_SK5, (SOCKADDR *)&addr_SK5, &addrSize_SK5);
 		if (s_SK5 == INVALID_SOCKET)
 		{
-			printf("[ERROR] s_SK5 INVALID_SOCKET!\n");
+			printf("[!] s_SK5 INVALID_SOCKET!\n");
 		}
 		else
-			if(VERBOSE_mode) printf("[+] s_SK5 Connected\n");
+			if (VERBOSE_mode) printf("[+] s_SK5 Connected\n");
 
-		s_CLIENT = accept(serverSocket_CLIENT, (SOCKADDR *) &addr_CLIENT, &addrSize_CLIENT);
+		s_CLIENT = accept(serverSocket_CLIENT, (SOCKADDR *)&addr_CLIENT, &addrSize_CLIENT);
 		if (s_CLIENT == INVALID_SOCKET)
 		{
-			printf("[ERROR] s_Client INVALID_SOCKET!\n");
+			printf("[!] s_Client INVALID_SOCKET!\n");
 		}
 		else
 			if (VERBOSE_mode) printf("[+] s_Client Connected\n");
@@ -102,10 +107,11 @@ int main()
 		d.VERBOSE_mode = VERBOSE_mode;
 		d.OLDMODEM_mode = OLDMODEM_mode;
 		d.buf_size = buf_size;
+		d.timeout_sec = timeout_sec;
 
-		create_sock_thread(d);
+		create_sock_thread((void*)&d);
 	}
 
-	system("\n\npause");
+	getchar();
 	return 0;
 }
